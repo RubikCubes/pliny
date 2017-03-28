@@ -23,10 +23,6 @@ login_manager.init_app(app)
 
 login_manager.login_view = "sign_in"
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, unique=True)
@@ -35,16 +31,13 @@ class User(UserMixin, db.Model):
 def check_credentials(user_email):
     user = User.query.filter_by(email=user_email).first()
     if user:
-        print('found user: %s. Loggin in!' % user.email)
-        login_user(user)
+        print('found user: %s' % user.email)
         
     if not user:
         print('Did not find user %s. Adding to DB' % user_email)
         u = User(email=user_email)
         db.session.add(u)
         db.session.commit()
-        check_credentials(user_email)
-
 
 @app.route('/test')
 @login_required

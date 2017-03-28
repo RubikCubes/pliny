@@ -26,6 +26,7 @@ def load_user(user_id):
 @app.route('/')
 def index():
     user = User.query.filter_by(username = 'Anthony').first()
+    print(user)
     login_user(user)
     return 'You are now logged in!'
 
