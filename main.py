@@ -1,20 +1,36 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, session
+from flask_login import LoginManager, login_required, login_user, UserMixin
 from apiclient import discovery
 from oauth2client import client
 import httplib2
 
 
+
+
 app = Flask(__name__)
 app.debug=True
+app.secret_key = 'secret key'
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "sign_in"
+
+
+
+@app.route('/test')
+@login_required
+def login_required():
+    return 'logged in'
  
 @app.route('/')
 def sign_in():
+    print('running /')
     return render_template('google_sign_in.html')
 
 @app.route('/storeauthcode', methods=['GET', 'POST'])
 def get_auth_code():
     if not request.headers.get('X-Requested-With'):
-        abort(403)
+        return 'Aborted'
 
     auth_code = request.data
 
@@ -36,22 +52,12 @@ def get_auth_code():
     service = discovery.build('gmail', 'v1', http=http_auth)
     
     results = service.users().labels().list(userId='me').execute()
-
-    labels = results.get('labels', [])
-    if not labels:
-        print('No labels found.')
-    else:
-      print('Labels:')
-      for label in labels:
-        print(label['name'])
-
-    # appfolder = service.files().get(fileId='appfolder').execute()
-
+    
     # Get profile info from ID token
     userid = credentials.id_token['sub']
     email = credentials.id_token['email']
-    
-    
+    return 'finished auth'
+
 
 
  
